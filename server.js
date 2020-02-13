@@ -151,9 +151,31 @@ app.route('/addList').post(function(req, res){
 
 // Route list : permet retourner l'ensemble des list créées
 app.route('/list').get(function(req, res){
-    
+
     List.find({}, function(err, data){
         res.send(data); 
+    });
+});
+
+// Route updateUser : permet d'update le user afin d'afficher ses listes dans la route userList
+app.route('/updateUser').put(function(req, res){
+
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
+
+        if(err) 
+            res.send(err)    
+
+        else{
+            User.updateOne({_id: [decoded.id]},{$set : {listId : req.body['listId[]']}}, function(err, data){
+
+                if(err)
+                    res.send(err); 
+
+                else 
+                    res.send(data)
+
+            });
+        }
     });
 });
 
@@ -179,7 +201,7 @@ app.route('/userList/:id').get(function(req, res){
 
 });
 
-app.route('/updateList').put(function(req, res){
+app.route('/updateUser').put(function(req, res){
 
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
@@ -187,7 +209,7 @@ app.route('/updateList').put(function(req, res){
             res.send(err)    
 
         else{
-            List.update({_id: decoded.id},{$set : {'userId' : 'userId[]'}}, function(err, data){
+            User.updateOne({_id: [decoded.id]},{$set : {listId : req.body['listId[]']}}, function(err, data){
 
                 if(err)
                     res.send(err); 
@@ -199,6 +221,8 @@ app.route('/updateList').put(function(req, res){
         }
     });
 });
+
+
 // Tasks
 
 // app.route('/addTasks').post(function(req, res){
