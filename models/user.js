@@ -15,6 +15,10 @@ let userSchema = new mongoose.Schema({
         type: 'string',
         required: 'You need to specifie a password'
     },
+    role: {
+        type: 'number', 
+        enum:[1,2]
+    },
 
     listId: [{
         type: mongoose.Schema.Types.ObjectId,

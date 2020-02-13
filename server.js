@@ -96,14 +96,12 @@ app.route('/login').post(function(req, res){
        
     })
 
-
-
-
 });
 
 
 // Route users : retourne l'ensemble des user inscrits 
 app.route('/users').get(function(req, res){
+    // insérer jwt avec rôle
     User.find({}, function(err, data) {
         res.send(data);
     });
@@ -113,7 +111,7 @@ app.route('/users').get(function(req, res){
 // Route List : création d'une liste
 app.route('/addList').post(function(req, res){
 
-    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){ 
         // verify() permet de vérifier le token
         // on envoie les token dans le header
         // decoded est un objet qui correspond à la base de notre token
@@ -163,17 +161,44 @@ app.route('/list').get(function(req, res){
 // Route userList : permet de récuperer un user ainsi que ses list créées 
 app.route('/userList/:id').get(function(req, res){
 
-    User.findOne({_id: req.params.id}).populate('listId[]').exec(function (err,data) {
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err)
-            res.send(err); 
-        else 
-            res.send(data)
+            res.send(err)
+
+        else {
+            User.findOne({_id: decoded.id}).populate('listId[]').exec(function (err,data) {
+
+                if(err)
+                    res.send(err); 
+                else 
+                    res.send(data)
+            });
+        }
     });
 
 });
 
-// app.route('/updateList').put
+app.route('/updateList').put(function(req, res){
+
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
+
+        if(err) 
+            res.send(err)    
+
+        else{
+            List.update({_id: decoded.id},{$set : {'userId' : 'userId[]'}}, function(err, data){
+
+                if(err)
+                    res.send(err); 
+
+                else 
+                    res.send(data)
+
+            });
+        }
+    });
+});
 // Tasks
 
 // app.route('/addTasks').post(function(req, res){
