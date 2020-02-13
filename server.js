@@ -149,14 +149,6 @@ app.route('/addList').post(function(req, res){
 });
 
 
-// Route list : permet retourner l'ensemble des list créées
-app.route('/list').get(function(req, res){
-
-    List.find({}, function(err, data){
-        res.send(data); 
-    });
-});
-
 // Route updateUser : permet d'update le user afin d'afficher ses listes dans la route userList
 app.route('/updateUser').put(function(req, res){
 
@@ -176,6 +168,15 @@ app.route('/updateUser').put(function(req, res){
 
             });
         }
+    });
+});
+
+
+// Route list : permet retourner l'ensemble des list créées
+app.route('/list').get(function(req, res){
+
+    List.find({}, function(err, data){
+        res.send(data); 
     });
 });
 
@@ -201,7 +202,80 @@ app.route('/userList/:id').get(function(req, res){
 
 });
 
-app.route('/updateUser').put(function(req, res){
+// Route deleteList : cette permet de supprimer une list
+app.route('/deleteList/:id').delete(function(req, res){
+
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
+
+        if(err)
+            res.send(err)
+
+        else{
+            Tasks.deleteMany({listId: req.params.id}, function(err, params){
+
+                if(err)
+                    res.send(err)
+                else{
+
+                    List.deleteOne({ listId: req.params.id}, function(err, data){ 
+
+                        if(err)
+                            res.send(err);
+                        else{
+                            res.send(data)
+                        }
+        
+                    });
+
+                }
+            })
+           
+        };
+    });
+
+});
+
+
+// Route Tasks : création d'une tasks
+
+app.route('/addTasks').post(function(req, res){
+
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){ 
+        // verify() permet de vérifier le token
+        // on envoie les token dans le header
+        // decoded est un objet qui correspond à la base de notre token
+
+        if (err) 
+            res.send(err)
+        else {
+
+            let tasks = new Tasks({
+                name: req.body.name, 
+                // userId: req.body["userId[]"]
+                userId: [decoded.id]
+                
+            });
+        
+            tasks.save(function(err,data){
+         
+        
+                    if(err)
+                        res.send(err)
+            
+                    else(data)
+                        res.send(data)
+                
+        
+            });
+
+        };
+
+    });
+   
+});
+
+// Route updateList : permet d'update les afin d'afficher ses tasks dans la route 
+app.route('/updateList/:id').put(function(req, res){
 
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
@@ -209,7 +283,7 @@ app.route('/updateUser').put(function(req, res){
             res.send(err)    
 
         else{
-            User.updateOne({_id: [decoded.id]},{$set : {listId : req.body['listId[]']}}, function(err, data){
+            List.updateOne({listId: req.body.id},{$set : {tasksId : req.body['tasksId[]']}}, function(err, data){
 
                 if(err)
                     res.send(err); 
@@ -222,34 +296,34 @@ app.route('/updateUser').put(function(req, res){
     });
 });
 
+// Route tasks : permet retourner l'ensemble des tasks créées
+app.route('/tasks').get(function(req, res){
 
-// Tasks
+    Tasks.find({}, function(err, data){
+        res.send(data); 
+    });
+});
 
-// app.route('/addTasks').post(function(req, res){
+// Route userTasks : permet de récuperer un user ainsi que ses list créées 
+app.route('/listTasks/:id').get(function(req, res){
 
-//     const name = req.body.name;
-//     const list = req.body.list;
+    jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
-//     let tasks = new Tasks({
-//         name: name, 
-//         list: list
-//     });
+        if(err)
+            res.send(err)
 
-//     if(name != null) {   
+        else {
+            List.findOne({listId: req.body.id}).populate('tasksId[]').exec(function (err,data) {
 
-//             tasks.save(function(err, data){
+                if(err)
+                    res.send(err); 
+                else 
+                    res.send(data)
+            });
+        }
+    });
 
-//                 if(err)
-//                     res.send(err)
-        
-//                 if(data)
-//                     res.send(data)
-//             });
-
-//         };
- 
-
-// });
+});
 
 
 

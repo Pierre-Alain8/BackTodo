@@ -12,12 +12,12 @@ let listSchema = new mongoose.Schema({
     tasksId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Tasks"
-    }],
+    }]
 
-    userId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    }],
+    // userId: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "User"
+    // }],
 
 
 
