@@ -5,10 +5,13 @@ const express = require('express'),
     mongoose = require('mongoose'),
     bcrypt = require('bcrypt'),
     jwt = require('jsonwebtoken'),
+    cors = require('cors'), 
     app = express();
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json()); 
+app.use(cors());
 
 
 // Initialisation de la connexion a la base de données
@@ -48,10 +51,10 @@ app.route('/register').post(function (req, res) {
                         
         
                 if(err)
-                    res.send(err)
+                    res.status(204).send(err);
         
                 if(data)
-                    res.send(data)
+                    res.status(200).send(data)
         
         
                 });
@@ -83,16 +86,16 @@ app.route('/login').post(function(req, res){
                     // le premier paramètre de la fonction sign et la data qu'on souhaite stocker dans le token
                     // le second paramètre est le nom de la clés de cryptage
                     let response = {user: data, token: token};
-                    res.send(response);
+                    res.status(200).send(response);
                 }
 
                 else
-                    res.send(err);
+                    res.status(204).send(err);
                
             });
         }
         else 
-            res.send(err);
+        res.status(204).send(err);
        
     })
 
@@ -103,7 +106,7 @@ app.route('/login').post(function(req, res){
 app.route('/users').get(function(req, res){
     // insérer jwt avec rôle
     User.find({}, function(err, data) {
-        res.send(data);
+        res.status(200).send(data);
     });
 });
 
@@ -117,7 +120,7 @@ app.route('/addList').post(function(req, res){
         // decoded est un objet qui correspond à la base de notre token
 
         if (err) 
-            res.send(err)
+            res.status(204).send(err)
         else {
 
             let list = new List({
@@ -131,10 +134,10 @@ app.route('/addList').post(function(req, res){
          
         
                     if(err)
-                        res.send(err)
+                        res.status(204).send(err)
             
                     else(data)
-                        res.send(data)
+                        res.status(200).send(data)
                 
         
             });
@@ -155,16 +158,16 @@ app.route('/updateUser').put(function(req, res){
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err) 
-            res.send(err)    
+            res.status(204).send(err);   
 
         else{
             User.updateOne({_id: [decoded.id]},{$set : {listId : req.body['listId[]']}}, function(err, data){
 
                 if(err)
-                    res.send(err); 
+                    res.status(204).send(err);
 
                 else 
-                    res.send(data)
+                res.status(200).send(data);
 
             });
         }
@@ -176,7 +179,7 @@ app.route('/updateUser').put(function(req, res){
 app.route('/list').get(function(req, res){
 
     List.find({}, function(err, data){
-        res.send(data); 
+        res.status(200).send(data);
     });
 });
 
@@ -187,15 +190,15 @@ app.route('/userList/:id').get(function(req, res){
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err)
-            res.send(err)
+            res.status(204).send(err);
 
         else {
             User.findOne({_id: decoded.id}).populate('listId[]').exec(function (err,data) {
 
                 if(err)
-                    res.send(err); 
+                    res.status(204).send(err);
                 else 
-                    res.send(data)
+                    res.status(200).send(data);
             });
         }
     });
@@ -208,21 +211,21 @@ app.route('/deleteList/:id').delete(function(req, res){
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err)
-            res.send(err)
+            res.status(204).send(err);
 
         else{
             Tasks.deleteMany({listId: req.params.id}, function(err, params){
 
                 if(err)
-                    res.send(err)
+                    res.status(204).send(err);
                 else{
 
                     List.deleteOne({ listId: req.params.id}, function(err, data){ 
 
                         if(err)
-                            res.send(err);
+                            res.status(204).send(err);
                         else{
-                            res.send(data)
+                            res.status(200).send(data);
                         }
         
                     });
@@ -245,7 +248,7 @@ app.route('/addTasks').post(function(req, res){
         // decoded est un objet qui correspond à la base de notre token
 
         if (err) 
-            res.send(err)
+            res.status(204).send(err);
         else {
 
             let tasks = new Tasks({
@@ -259,10 +262,10 @@ app.route('/addTasks').post(function(req, res){
          
         
                     if(err)
-                        res.send(err)
+                        res.status(204).send(err);
             
                     else(data)
-                        res.send(data)
+                        res.status(200).send(data);
                 
         
             });
@@ -279,16 +282,16 @@ app.route('/updateList/:id').put(function(req, res){
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err) 
-            res.send(err)    
+            res.status(204).send(err);   
 
         else{
             List.updateOne({listId: req.body.id},{$set : {tasksId : req.body['tasksId[]']}}, function(err, data){
 
                 if(err)
-                    res.send(err); 
+                    res.status(204).send(err);
 
                 else 
-                    res.send(data)
+                    res.status(200).send(data);
 
             });
         }
@@ -299,25 +302,25 @@ app.route('/updateList/:id').put(function(req, res){
 app.route('/tasks').get(function(req, res){
 
     Tasks.find({}, function(err, data){
-        res.send(data); 
+        res.status(200).send(data);
     });
 });
 
 // Route userTasks : permet de récuperer un user ainsi que ses list créées 
-app.route('/listTasks/:id').get(function(req, res){
+app.route('/Tasks/:id').get(function(req, res){
 
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err)
-            res.send(err)
+            res.status(204).send(err);
 
         else {
             List.findOne({listId: req.body.id}).populate('tasksId[]').exec(function (err,data) {
 
                 if(err)
-                    res.send(err); 
+                    res.status(204).send(err);
                 else 
-                    res.send(data)
+                    res.status(200).send(data);
             });
         }
     });
@@ -330,21 +333,21 @@ app.route('/deleteTask/:id').delete(function(req, res){
     jwt.verify(req.headers["x-access-token"], "maclefsecrete", function(err, decoded){
 
         if(err)
-            res.send(err)
+            res.status(204).send(err);
 
         else{
             List.deleteMany({tasksId: req.params.id}, function(err, params){
 
                 if(err)
-                    res.send(err)
+                    res.status(204).send(err);
                 else{
 
                     Tasks.deleteOne({ listId: req.params.id}, function(err, data){ 
 
                         if(err)
-                            res.send(err);
+                            res.status(204).send(err);
                         else{
-                            res.send(data)
+                            res.status(200).send(data);
                         }
         
                     });
